@@ -3,7 +3,7 @@
 The CLI is going to have the following interface. You can use it for testing purposes when you develop XML document parsing.
 
 ```shell
-usage: rss_reader.py [-h] [--json] [--limit LIMIT]
+usage: task.py [-h] [--json] [--limit LIMIT]
                     source
 
 Pure Python command-line RSS reader.
