@@ -11,7 +11,8 @@ class UnhandledException(Exception):
 def rss_parser(
     xml: str,
     limit: Optional[int] = None,
-    json: bool = False,
+    json_output: bool = False,
+    json: bool = False
 ) -> List[str]:
     try:
         root = Et.fromstring(xml)
@@ -20,9 +21,9 @@ def rss_parser(
         result = [
             f"Feed: {channel.findtext('title')}",
             f"Link: {channel.findtext('link')}",
-            f"Last Build Date: {channel.findtext('lastBuildDate') or 'None'}",
-            f"Publish Date: {channel.findtext('pubDate') or 'None'}",
-            f"Language: {channel.findtext('language') or 'None'}",
+            f"Last Build Date: {channel.findtext('lastBuildDate') or None}",
+            f"Publish Date: {channel.findtext('pubDate') or None}",
+            f"Language: {channel.findtext('language') or None}",
         ]
 
         categories = channel.findall(".//category")
@@ -31,20 +32,46 @@ def rss_parser(
                           ", ".join(category.text for category in categories))
 
         result.append(
-            f"Managing Editor: {channel.findtext('managingEditor') or 'None'}")
+            f"Managing Editor: {channel.findtext('managingEditor') or None}")
         result.append(
-            f"Description: {channel.findtext('description') or 'None'}")
+            f"Description: {channel.findtext('description') or None}")
 
         items = root.findall(".//item")[:limit]
         for item in items:
             result.append("\n")
-            result.append(f"Title: {item.findtext('title') or 'None'}")
-            result.append(f"Author: {item.findtext('author') or 'None'}")
-            result.append(f"Published: {item.findtext('pubDate') or 'None'}")
-            result.append(f"Link: {item.findtext('link') or 'None'}")
-            result.append(f"Category: {item.findtext('category') or 'None'}")
+            result.append(f"Title: {item.findtext('title') or None}")
+            result.append(f"Author: {item.findtext('author') or None}")
+            result.append(f"Published: {item.findtext('pubDate') or None}")
+            result.append(f"Link: {item.findtext('link') or None}")
+            result.append(f"Category: {item.findtext('category') or None}")
             result.append(
-                f"Description: {item.findtext('description') or 'None'}")
+                f"Description: {item.findtext('description') or None}")
+
+        if json or json_output:
+            json_result = {
+                "title": channel.findtext('title') or 'None',
+                "link": channel.findtext('link') or 'None',
+                "lastBuildDate": channel.findtext('lastBuildDate') or None,
+                "pubDate": channel.findtext('pubDate') or None,
+                "language": channel.findtext('language') or None,
+                "category": [category.text for category in categories],
+                "managingEditor": channel.findtext('managingEditor') or None,
+                "description": channel.findtext('description') or None,
+                "items": [
+                    {
+                        "title": item.findtext('title') or None,
+                        "author": item.findtext('author') or None,
+                        "pubDate": item.findtext('pubDate') or None,
+                        "link": item.findtext('link') or None,
+                        "category": item.findtext('category') or None,
+                        "description": item.findtext('description') or None,
+                        "guid": item.findtext('guid') or None,
+                    }
+                    for item in items
+                ],
+            }
+
+            return [json_module.dumps(json_result, indent=2)]
         return result
 
     except Exception as e:
