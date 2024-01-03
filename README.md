@@ -1,6 +1,8 @@
 # RSS-Scrapper
 
-The CLI is going to have the following interface. You can use it for testing purposes when you develop XML document parsing.
+RSS-Scrapper project for python practice and existing project implementation.
+
+The CLI is going to have the following interface.
 
 ```shell
 usage: task.py [-h] [--json] [--limit LIMIT]
