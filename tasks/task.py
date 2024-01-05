@@ -2,6 +2,7 @@ from xml.etree import ElementTree as Et
 from argparse import ArgumentParser
 from typing import List, Optional, Sequence
 import json as json_module
+import requests
 
 
 class UnhandledException(Exception):
@@ -76,3 +77,38 @@ def rss_parser(
 
     except Exception as e:
         raise UnhandledException(e)
+
+
+def main(argv: Optional[Sequence] = None):
+    """
+    The main function of your task.
+    """
+    parser = ArgumentParser(
+        prog="rss_reader",
+        description="Pure Python command-line RSS reader.",
+    )
+    parser.add_argument("source", help="RSS URL", type=str, nargs="?")
+    parser.add_argument(
+        "--json", help="Print result as JSON in stdout", action="store_true"
+    )
+    parser.add_argument(
+        "--limit", help="Limit news topics if this parameter provided", type=int
+    )
+
+    args = parser.parse_args(argv)
+    if not args.source:
+        print("Error: Please provide an RSS URL.")
+        return 1
+
+    try:
+        response = requests.get(args.source)
+        response.raise_for_status()
+        xml = response.text
+        print("\n".join(rss_parser(xml, args.limit, args.json)))
+        return 0
+    except Exception as e:
+        raise UnhandledException(e)
+
+
+if __name__ == "__main__":
+    main()
